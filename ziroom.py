@@ -2,13 +2,18 @@
 import sys
 import requests
 import time
+import json
+import sys
 
 from redis import StrictRedis
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 redis_conn = StrictRedis(host='localhost', port=6379)
 
 ZIROOM = 'ziroom'
-
+f2 = open('detail.log','a+')
 while True:
     print 'start crawl %s %s ' % (sys.argv[1], str(time.time()))
     with open('ziroom.txt', 'a+') as f:
@@ -21,7 +26,9 @@ while True:
             for i in res.json()['data']:
                 if isinstance(i, dict) and not redis_conn.get(ZIROOM+i['id'].strip()):
                     print '%s %s %s '% (i['id'], i['title'], i['sell_price'])
-                    redis_conn.set(ZIROOM+i['id'], 1)
+                    # redis_conn.set(ZIROOM+i['id'], 1)
+                    detail = json.dumps(i,ensure_ascii=False,indent=4)
+                    f2.write(detail+'\n\n')
                     f.write(str(i)+'\n')
 
             time.sleep(4)
